@@ -2,76 +2,82 @@
 
 ## Grupo 2 — Escopo
 - Curva de Juros (Parte 1): referência em janeiro de 2008.
-- Parte 2 — Estimar a taxa de juros real: usar dados do IPCA e taxas nominais.
-  - Fase inicial: base de dados 2019–2020 (Grupo 2).
-  - Fase estendida: base de dados 2011–2020 (Grupo 2).
+- Parte 2 — Estimar a taxa de juros nominal via regressão (Selic ~ IPCA) e analisar a taxa real:
+  - Janela inicial: 2019–2020 (Grupo 2).
+  - Janela estendida: 2011–2020 (Grupo 2).
 
 ## Objetivos
-1. Estimar a curva de juros para a data de referência do grupo (jan/2008) usando Python.
-2. Analisar a curva (curto vs. longo prazo, relação com economia, política monetária, impactos em finanças pessoais).
-3. Estimar a taxa de juros real (aproximação com IPCA) e discutir resultados.
+1. Estimar a curva de juros na data de referência do grupo (jan/2008) em Python.
+2. Analisar a curva (curto vs. longo prazo, relação com economia, política monetária, finanças pessoais).
+3. Parte 2: Estimar Selic por regressão linear simples em função do IPCA (sem variável tempo), apresentar equação e métricas (R², R² ajustado, teste t, p-valor) e comparar janelas.
 
-## Materiais de apoio
-- Notebook oficial (Jupyter) mencionado nas orientações: “Etapa 3 - Curva de Juros - scriptfinal.ipynb”.
-- Página “Materiais de apoio” e “Envio da tarefa da etapa 3” (Canvas).
-
-## Estrutura sugerida do repositório
+## Estrutura do repositório
 ```
 .
 ├─ data/
-│  ├─ raw/             # fontes originais (ex.: taxas, IPCA)
-│  └─ processed/       # dados tratados
+│  ├─ raw/             # arquivos brutos salvos pelo notebook (ipca.csv, selic.csv)
+│  └─ processed/       # dados tratados (opcional)
 ├─ notebooks/
-│  └─ etapa3_curva_juros_grupo2.ipynb
-├─ src/
-│  ├─ fetch/           # download/coleta de dados
-│  ├─ processing/      # limpeza e transformação
-│  ├─ modeling/        # estimação da curva e taxa real
-│  └─ viz/             # gráficos
+│  ├─ etapa3_parte1.ipynb
+│  └─ etapa3_parte2.ipynb
 └─ README.md
 ```
 
 ## Requisitos
-- Python 3.10+
+- Python 3.9–3.11
 - Jupyter Notebook ou JupyterLab
-- Bibliotecas sugeridas: pandas, numpy, matplotlib/plotly, seaborn, statsmodels, scikit-learn, yfinance (se aplicável).
+- Bibliotecas: pandas, numpy, matplotlib, seaborn, plotly, statsmodels, bcb (ou alternativa via requests)
 
-Crie um `requirements.txt` (exemplo):
+Compatibilidade `pandas` × `bcb`:
+- `python-bcb`/`bcb` 0.1.8 requer `pandas >=1.4.4,<2.0`. Se você estiver com `pandas 2.x`, escolha:
+  - Downgrade do pandas (ex.: `pandas==1.5.3`), ou
+  - Não usar `bcb` e buscar dados via API do BCB (exemplo abaixo).
+
+Exemplo de `requirements.txt` (com `bcb`):
 ```
-pandas
+pandas==1.5.3
 numpy
 matplotlib
 seaborn
 plotly
 statsmodels
-scikit-learn
-yfinance
+bcb
 jupyter
 ```
 
-## Passo a passo — Parte 1 (Curva de Juros)
-1. Preparar ambiente Python e Jupyter.
-2. Obter as séries necessárias para a data de referência (jan/2008):
-   - Taxas de juros por diferentes prazos (curva a termo).
-   - Fontes possíveis: BCB/SGS, ANBIMA, provedores públicos.
-3. Estimar a curva de juros no notebook `notebooks/etapa3_curva_juros_grupo2.ipynb`.
-4. Produzir gráficos e análises:
-   - Tendências de curto e longo prazo.
-   - Relação com variáveis macro (Selic, inflação, câmbio, desemprego, etc.).
-   - Implicações de política monetária e finanças pessoais.
+## Parte 2 — Fluxo (atual no notebook)
+1) Coleta de dados (BCB/SGS):
+   - IPCA mensal (%): série 433
+   - Selic ao ano (%): série 432
+   - Código base (notebook): `from bcb import sgs` e `sgs.get({...}, start, end)`
+   - Arquivos gerados em `data/raw/`: `ipca.csv`, `selic.csv`
 
-## Passo a passo — Parte 2 (Taxa de juros real)
-1. Selecionar a janela de dados:
-   - Fase 1 (inicial): 2019–2020 (Grupo 2).
-   - Fase 2 (estendida): 2011–2020 (Grupo 2).
-2. Obter IPCA (inflação) e taxas nominais correspondentes.
-3. Calcular taxa de juros real aproximada (ex.: Fisher aproximado) e/ou estimar via modelos (ex.: regressão) conforme orientações.
-4. Documentar resultados e comparação entre janelas (2019–2020 vs. 2011–2020).
+2) Preparos e janelas:
+   - Janela 2019–2020 (preparo inicial)
+   - Janela 2011–2020 (estendida)
 
-## Entregáveis esperados
-- Notebook com código reprodutível para a Parte 1 e Parte 2.
-- Visualizações (gráficos) e interpretação dos resultados.
-- Este `README.md` atualizado com instruções para reprodução.
+3) Regressão linear simples (statsmodels):
+   - Modelo: `Selic = β0 + β1 × IPCA`
+   - Métricas reportadas: R², R² ajustado, teste t e p-valor do coeficiente de IPCA
+
+4) Visualização (Plotly):
+   - Dispersão (Selic vs IPCA) com `trendline='ols'`, anotação da equação e R²
+
+5) Taxa real (opcional no notebook):
+   - Cálculo por Fisher (aproximado e exato) para contextualização
+
+## Alternativa sem `bcb` (mantendo `pandas 2.x`)
+Exemplo para IPCA via API do BCB:
+```python
+import requests, pandas as pd
+url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados"
+params = {"formato":"json","dataInicial":"01/01/2011","dataFinal":"31/12/2020"}
+data = requests.get(url, params=params).json()
+df_ipca = pd.DataFrame(data)
+df_ipca["date"] = pd.to_datetime(df_ipca["data"], dayfirst=True).values.astype("datetime64[M]").astype("datetime64[ns]")
+df_ipca["ipca_mom"] = pd.to_numeric(df_ipca["valor"], errors="coerce")
+df_ipca = df_ipca[["date","ipca_mom"]].sort_values("date")
+```
 
 ## Como executar
 1. Criar e ativar ambiente (ex.: venv):
@@ -85,31 +91,9 @@ jupyter
    ```powershell
    jupyter notebook
    ```
-
-## Git — inicialização e commit inicial
-```powershell
-git init
-git add .
-git commit -m "chore: inicializa Etapa 3 (Grupo 2) e README"
-git branch -M main
-```
-
-## Criar repositório no GitHub (opções)
-- Usando GitHub CLI (recomendado):
-  ```powershell
-  gh repo create PUC-Etapa3-Grupo2 --source . --public --confirm
-  git push -u origin main
-  ```
-  Requer estar logado: `gh auth login`.
-
-- Usando token pessoal (PAT) via HTTPS:
-  ```powershell
-  git remote add origin https://github.com/<seu-usuario>/PUC-Etapa3-Grupo2.git
-  git push -u origin main
-  ```
-  Na primeira autenticação, informe o usuário e o PAT.
+3. Abra `notebooks/etapa3_parte2.ipynb` e execute em ordem: coleta (SGS), salvamento dos CSVs, join, regressões (2019–2020, 2011–2020) e gráficos.
 
 ## Observações
-- Garanta versionamento de dados (ou mantenha `data/raw` fora do repositório, via `.gitignore`, se forem arquivos grandes/sigilosos).
-- Documente as fontes e datas de coleta.
-- Valide os resultados com o notebook de apoio oficial.
+- Use IPCA e Selic em unidades compatíveis (ambas % a.a. ao comparar/regredir). No notebook, o IPCA mensal é anualizado antes da regressão.
+- Documente fontes e datas de coleta. Evite versionar dados sensíveis/grandes.
+- Para o envio, inclua prints/resumos de equação e métricas conforme orientações (equação, R², R² ajustado, teste t, p-valor).
