@@ -1,0 +1,17 @@
+# Dependências principais
+pandas==1.5.3
+numpy>=1.23
+matplotlib>=3.6
+seaborn>=0.12
+plotly>=5.20
+statsmodels>=0.13
+
+# Coleta via Banco Central (SGS)
+bcb==0.1.8
+
+# Jupyter
+jupyter
+ipykernel
+
+# Alternativa de coleta (se não usar bcb)
+requests>=2.31

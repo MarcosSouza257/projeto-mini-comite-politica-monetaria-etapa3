@@ -1,10 +1,10 @@
-# Etapa 3 — Mini Comitê de Política Monetária (Turma 02 - 2025/2)
+# Etapa 3 — Mini Comitê de Política Monetária
 
-## Grupo 2 — Escopo
+## Escopo
 - Curva de Juros (Parte 1): referência em janeiro de 2008.
 - Parte 2 — Estimar a taxa de juros nominal via regressão (Selic ~ IPCA) e analisar a taxa real:
-  - Janela inicial: 2019–2020 (Grupo 2).
-  - Janela estendida: 2011–2020 (Grupo 2).
+  - Janela inicial: 2019–2020.
+  - Janela estendida: 2011–2020.
 
 ## Objetivos
 1. Estimar a curva de juros na data de referência do grupo (jan/2008) em Python.
@@ -92,8 +92,3 @@ df_ipca = df_ipca[["date","ipca_mom"]].sort_values("date")
    jupyter notebook
    ```
 3. Abra `notebooks/etapa3_parte2.ipynb` e execute em ordem: coleta (SGS), salvamento dos CSVs, join, regressões (2019–2020, 2011–2020) e gráficos.
-
-## Observações
-- Use IPCA e Selic em unidades compatíveis (ambas % a.a. ao comparar/regredir). No notebook, o IPCA mensal é anualizado antes da regressão.
-- Documente fontes e datas de coleta. Evite versionar dados sensíveis/grandes.
-- Para o envio, inclua prints/resumos de equação e métricas conforme orientações (equação, R², R² ajustado, teste t, p-valor).
